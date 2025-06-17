@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Expense {
+  id String @id @default(uuid())
+
+  code        String  @unique
+  description String?
+
+  clientId   String
+  clientName String
+
+  items ExpenseItem[]
+
+  deliveryMethod String // e.g., cash, card, bank transfer
+  outputType     String // e.g., email, print, download
+  placeOfIssue   String // e.g., office, online
+
+  warehouseId String?
+  warehouseName String?
+
+  total  Float
+  status String @default("pending") // e.g., pending, approved, rejected
+}
+
+model ExpenseItem {
+  id String @id @default(uuid())
+
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  expenseId String
+
+  productId    String?
+  productName  String?
+  productPrice Float?
+  productTotal Float?
+  productQty   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expenseId])
+}
+
+enum OutputType {
+  SALE
+  QUOTATION
+  REPLACEMENT
+  CONSIGNMENT
+}
